@@ -1,0 +1,388 @@
+%
+% NOTE -- ONLY EDIT THE .Rnw FILE!!!  The .tex file is
+% likely to be overwritten.
+%
+
+%\VignetteIndexEntry{managing multiple NGS samples with bamViews}
+%\VignetteDepends{Biobase, Rsamtools}
+%\VignetteKeywords{NGS}
+%\VignettePackage{leeBamViews}
+
+\documentclass[12pt]{article}
+
+\usepackage{amsmath,pstricks}
+\usepackage[authoryear,round]{natbib}
+\usepackage{hyperref}
+
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\texttt{#1}}}
+\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+
+\textwidth=6.2in
+
+\bibliographystyle{plainnat} 
+ 
+\begin{document}
+%\setkeys{Gin}{width=0.55\textwidth}
+
+
+\title{Managing and analyzing multiple NGS samples with Bioconductor bamViews objects:
+application to RNA-seq}
+\author{VJ Carey}
+\maketitle
+
+\tableofcontents
+
+\clearpage
+
+\section{Introduction}
+We consider a lightweight approach to Bioconductor-based
+management and interrogation of
+multiple samples to which NGS methods have been applied.
+
+The basic data store is the binary SAM (BAM) format \citep{Li:2009p1146}.
+This format is widely used in the 1000 genomes project, and transformations
+between SAM/BAM and output formats of various popular alignment programs
+are well-established.  Bioconductor's Rsamtools package allows direct
+use of important SAM data interrogation facilities from R.
+
+\section{Basic design}
+A collection of NGS samples is represented through the associated set
+of BAM files and BAI index files.  These can be stored in the inst/bam
+folder of an R package to facilitate documented programmatic access
+through R file navigation facilities, or the BAM/BAI files can be
+accessed through arbitrary path or URL references.
+
+The bamViews class is defined to allow reliable fine-grained 
+access to the NGS data along with relevant metadata.
+A bamViews instance contains access path information for
+a set of related BAM/BAI files, along with sample metadata
+and an optional specification of genomic ranges of interest.
+
+A key design aspect of the bamViews class is preservation of
+semantics of the \texttt{X[G, S]} idiom familiar from \texttt{ExpressionSet}
+objects for management of multiple microarrays.  With
+\texttt{ExpressionSet} instances, \texttt{G}
+is a predicate specifying selection of microarray probes of interest.
+With \texttt{bamViews} instances, \texttt{G}
+is a predicate specifying selection of genomic features
+of interest.  At present, for bamViews, selection using 
+\texttt{G} involves ranges of genomic coordinates.
+
+\section{Illustration}
+
+Data from
+four samples from a yeast RNA-seq experiment (two wild type, two `RLP'
+mutants) are organized in the leeBamViews package.
+The data are collected to allow regeneration of aspects of Figure 8 of
+\citet{Lee:2008p932}.
+We obtained all reads between bases 800000
+and 900000 of yeast chromosome XIII.
+
+We have not yet addressed durable serialization of manager objects,
+so the bamViews instance is created on the fly.
+<<lkd,keep.source=TRUE>>=
+library(leeBamViews)  # bam files stored in package
+bpaths = dir(system.file("bam", package="leeBamViews"), full=TRUE, patt="bam$")
+#
+# extract genotype and lane information from filenames
+#
+gt = gsub(".*/", "", bpaths)
+gt = gsub("_.*", "", gt)
+lane = gsub(".*(.)$", "\\1", gt)
+geno = gsub(".$", "", gt)
+#
+# format the sample-level information appropriately
+#
+pd = DataFrame(geno=geno, lane=lane, row.names=paste(geno,lane,sep="."))
+prd = new("DataFrame")  # protocol data could go here
+#
+# create the views object, adding some arbitrary experiment-level information
+#
+bs1 = BamViews(bamPaths=bpaths, bamSamples=pd, 
+        bamExperiment=list(annotation="org.Sc.sgd.db"))
+bs1
+#
+# get some sample-level data
+#
+bamSamples(bs1)$geno
+@
+
+
+We would like to operate on specific regions of
+chr XIII for all samples.  Note that the aligner
+in use (bowtie) employed ``Scchr13'' to
+refer to this chromosome.  We add a RangedData instance to
+the view to identify the region of interest.
+<<lkc>>=
+START=c(861250, 863000)
+END=c(862750, 864000)
+exc = GRanges(IRanges(start=START, end=END), seqnames="Scchr13", strand="+")
+bamRanges(bs1) = exc
+bs1
+@
+
+A common operation will be to extract coverage information.
+We use a transforming method, \texttt{readGappedAlignments},
+from the GenomicRanges package
+to extract reads and metadata for each region and each sample.
+@
+<<lkcov>>=
+covex = lapply( bamPaths(bs1), function(x)coverage(readGappedAlignments(x))[[1]])
+covex[1:3]
+@
+
+
+Let's visualize what we have so far.  We use GenomeGraphs and
+add some supporting software.
+<<addso>>=
+library(GenomeGraphs)
+cov2baseTrack = function(rle, start, end,
+   dp = DisplayPars(type="l", lwd=0.5, color="black"),
+   countTx=function(x)log10(x+1)) {
+ require(GenomeGraphs)
+ if (!is(rle, "Rle")) stop("requires instance of Rle")
+ dat = rle@values
+ loc = cumsum(rle@lengths)
+ ok = which(loc >= start & loc <= end)
+ makeBaseTrack(base = loc[ok], value=countTx(dat[ok]),
+    dp=dp)
+}
+trs = lapply(covex, function(x) cov2baseTrack(x, START[1], END[1],
+   countTx = function(x)pmin(x, 80)))
+ac = as.character
+names(trs) = paste(ac(bamSamples(bs1)$geno), ac(bamSamples(bs1)$lane), sep="")
+library(biomaRt)
+mart = useMart("ensembl", "scerevisiae_gene_ensembl")
+gr = makeGeneRegion(START, END, chromosome="XIII",
+  strand="+", biomart=mart, dp=DisplayPars(plotId=TRUE,
+  idRotation=0, idColor="black"))
+trs[[length(trs)+1]] = gr
+trs[[length(trs)+1]] = makeGenomeAxis()
+<<lkf,fig=TRUE>>=
+print( gdPlot( trs, minBase=START[1], maxBase=END[1]) )
+@
+
+We can encapsulate this to something like:
+<<mkps,eval=FALSE>>=
+plotStrains = function(bs, query, start, end, snames, mart, chr, strand="+") {
+ filtbs = bs[query, ]
+ cov = lapply(filtbs, coverage)
+ covtrs = lapply(cov, function(x) cov2baseTrack(x[[1]], start, end,
+   countTx = function(x) pmin(x,80)))
+ names(covtrs) = snames
+ gr = makeGeneRegion(start, end, chromosome=chr,
+       strand=strand, biomart=mart, dp=DisplayPars(plotId=TRUE,
+       idRotation=0, idColor="black"))
+ grm = makeGeneRegion(start, end, chromosome=chr,
+       strand="-", biomart=mart, dp=DisplayPars(plotId=TRUE,
+       idRotation=0, idColor="black"))
+ covtrs[[length(covtrs)+1]] = gr
+ covtrs[[length(covtrs)+1]] = makeGenomeAxis()
+ covtrs[[length(covtrs)+1]] = grm
+ gdPlot( covtrs, minBase=start, maxBase=end )
+}
+@
+ 
+%\begin{verbatim}
+%> NN = RangesList("Scchr03"=IRanges(start=174500,end=177750))
+%> plotStrains(bs1, NN, 174500, 177500, letters[1:4], mart, "III")
+%\end{verbatim}
+
+\section{Comparative counts in a set of regions of interest}
+
+\subsection{Counts in a regular partition}
+
+The supplementary information for the Lee paper includes
+data on unnannotated transcribed regions reported in other studies.
+We consider the study of David et al., confining attention
+to chromosome XIII.  If you wanted to study their intervals
+you could use code like
+<<lkda,eval=FALSE>>=
+data(leeUnn)
+names(leeUnn)
+leeUnn[1:4,1:8]
+table(leeUnn$study)
+l13 = leeUnn[ leeUnn$chr == 13, ]
+l13d = na.omit(l13[ l13$study == "David", ])
+d13r = GRanges(IRanges( l13d$start, l13d$end ), seqnames="Scchr13", strand=ifelse(l13d$strand==1, "+",
+  ifelse(l13d$strand=="0", "*", "-")))
+elementMetadata(d13r)$name = paste("dav13x", 1:length(d13r), sep=".")
+bamRanges(bs1) = d13r
+d13tab = tabulateReads( bs1 )
+@
+but our object  \texttt{bs1} is too restricted in its coverage.  Instead,
+we illustrate with a small set of subintervals of the
+basic interval in use:
+<<makn,eval=TRUE>>=
+myrn = GRanges(IRanges(start=seq(861250, 862750, 100), width=100),
+    seqnames="Scchr13", strand="+")
+elementMetadata(myrn)$name = paste("til", 1:length(myrn), sep=".")
+bamRanges(bs1) = myrn
+tabulateReads(bs1, "+")
+@
+
+\subsection{Counts in annotated intervals: genes}
+
+We can use Bioconductor annotation resources
+to acquire boundaries of yeast genes on our subregion of chromosome 13.
+
+In the following chunk we generate annotated ranges of genes on the
+Watson strand.
+<<ddee,keep.source=TRUE>>=
+library(org.Sc.sgd.db)
+library(IRanges)
+c13g = get("13", revmap(org.Sc.sgdCHR))  # all genes on chr13
+c13loc = unlist(mget(c13g, org.Sc.sgdCHRLOC))  # their 'start' addresses
+c13locend = unlist(mget(c13g, org.Sc.sgdCHRLOCEND))
+c13locp = c13loc[c13loc>0]     # confine attention to + strand
+c13locendp = c13locend[c13locend>0]
+ok = !is.na(c13locp) & !is.na(c13locendp)
+c13pr = GRanges(IRanges(c13locp[ok], c13locendp[ok]),   # store and clean up names
+    seqnames="Scchr13", strand="+")
+elementMetadata(c13pr)$name  =gsub(".13$", "", names(c13locp[ok]))
+c13pr
+c13pro = c13pr[ order(ranges(c13pr)), ]
+@
+
+That's the complete set of genes on the Watson strand of chromosome XIII.
+In the leeBamViews package,
+we do not have access to all these, but only those lying in a 100kb
+interval.  
+<<dolim>>=
+lim = GRanges(IRanges(800000,900000), seqnames="Scchr13", strand="+")
+c13prol = c13pro[ which(c13pro %in% lim ), ]
+@
+
+Now that we have a set of annotation-based genomic regions, we can tabulate
+read counts lying in those regions and obtain an annotated matrix.
+
+<<getm,eval=TRUE>>=
+bamRanges(bs1) = c13prol
+annotab = tabulateReads(bs1, strandmarker="+")
+@
+
+\section{Larger scale sanity check}
+
+The following plot compares read counts published with the
+Lee et al. (2008) paper to those computed by the methods
+sketched here, for all regions noted on the plus strand of chromosome
+XIII.  Exact correspondence is not expected because of different
+approaches to read filtering.
+
+\begin{center}
+\includegraphics{leeFull-dol}
+\end{center}
+
+\section{Statistical analyses of differential expression}
+
+\subsection{Using edgeR}
+
+Statistical analysis of read counts via 
+negative binomial distributions with moderated
+dispersion is developed in \citet{Robinson:2008p548}.
+The edgeR differential expression statistics are computed using
+regional read counts, and total library size plays a role.  We
+compute total read counts directly (the operation can be somewhat
+slow for very large BAM files):
+<<gettot,eval=TRUE>>=
+totcnts = totalReadCounts(bs1)
+@ 
+In the following demonstration, we will regard multiple lanes
+from the same genotype as replicates.  This is probably
+inappropriate for this method; the original authors tested
+for lane effects and ultimately combined counts across lanes
+within strain.
+
+<<lkedd,eval=TRUE,keep.source=TRUE>>=
+library(edgeR)
+#
+# construct an edgeR container for read counts, including 
+#   genotype and region (gene) metadata
+#
+dgel1 = DGEList( counts=t(annotab)[,-c(1,2)], 
+   group=factor(bamSamples(bs1)$geno),
+   lib.size=totcnts, genes=colnames(annotab))
+#
+# compute a dispersion factor for the negative binomial model
+#
+cd = estimateCommonDisp(dgel1)
+#
+# test for differential expression between two groups
+# for each region
+#
+et12 = exactTest(cd)
+#
+# display statistics for the comparison
+#
+tt12 = topTags(et12)
+tt12
+@
+
+An analog of the ``MA-plot'' familiar from
+microarray studies is available for this analysis.
+The `concentration' is the log proportion of reads
+present in each gene, and the ``log fold change''
+is the model-based estimate of relative abundance.
+In the following display we label the top 10 genes
+(those with smallest FDR).
+
+
+<<lkma,fig=TRUE>>=
+plotFC(et12, cex=.8, ylim=c(-10,10))
+text(tt12$table$logConc, tt12$table$logFC+.15, as.character(
+  tt12$table$genes), cex=.65)
+@
+
+
+\section{Summary}
+\begin{itemize}
+\item The BAM format provides reasonably compact and comprehensive
+information about a alignments of short reads obtained
+in a sequencing experiment.  samtools utilities permit efficient random
+access to read collections of interest.
+\item Rsamtools brings samtools functionality into R, principally
+through the scanBam method, which is richly parameterized so that
+many details of access to and filtering of reads from
+BAM files can be controlled in R.
+\item Rsamtools defines the bamViews container for management of
+collections of BAM files.  Read data are managed external to R; data
+on aligned reads can be imported efficiently, and ``streaming read''
+models for scanning large collections of reads can be used.
+Many embarassingly parallel operations can be accomplished concurrently
+using multicore or similar packages.
+\item The leeBamViews package provides small excerpts from BAM files
+generated after bowtie alignment of FASTQ records available
+through the NCBI short read archives.  These excerpts can be
+analyzed using code shown in this vignette.
+\item After the count data have been generated, various approaches
+to inference on differential expression are available.  We consider
+the moderated negative binomial models of edgeR above; more general
+variance modeling is available in the developmental DESeq package.
+\end{itemize}
+
+\bibliography{robb}
+
+\section{Session data}
+
+<<lks,eval=TRUE>>=
+sessionInfo()
+@
+
+
+\end{document}
