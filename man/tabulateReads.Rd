@@ -1,8 +1,9 @@
 \name{tabulateReads}
 \alias{tabulateReads}
-\alias{tabulateReads,BamViews,character-method}
-\alias{tabulateReads,BamViews,missing-method}
-\alias{tabulateReads,BamViews,characterORNULL-method}
+\alias{tabulateReads,BamViews,character,logical-method}
+\alias{tabulateReads,BamViews,missing,missing-method}
+\alias{tabulateReads,BamViews,characterORNULL,logical-method}
+\alias{tabulateReads,BamViews,characterORNULL,missing-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 tabulate counts of alignments occurring in specified genomic regions
@@ -11,7 +12,7 @@ tabulate counts of alignments occurring in specified genomic regions
 tabulate counts of alignments occurring in specified genomic regions
 }
 \usage{
-tabulateReads(bv, strandmarker)
+tabulateReads(bv, strandmarker=NULL, as.GRanges=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,6 +22,9 @@ tabulateReads(bv, strandmarker)
   \item{strandmarker}{
 character atom: `+' or `-'; if missing, ignore strand
 }
+  \item{as.GRanges}{
+logical directive to return a GRanges instance instead of a matrix
+  }
 }
 \details{
 \code{\link[Rsamtools]{readBamGappedAlignments}} is the basic engine

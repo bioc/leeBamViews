@@ -36,19 +36,19 @@ else strand(ifelse(x, "+", "-"))
  ans
 }
 
-setGeneric("tabulateReads", function(bv, strandmarker, as.GRanges)
+setGeneric("tabulateReads", function(bv, strandmarker=NULL, as.GRanges=FALSE)
  standardGeneric("tabulateReads"))
 
 setMethod("tabulateReads", c("BamViews", "characterORNULL", "logical"), 
-  function(bv, strandmarker=NULL, as.GRanges) {
+  function(bv, strandmarker=NULL, as.GRanges=FALSE) {
   .tabulateReads(bv, strandmarker, as.GRanges)
 })
 setMethod("tabulateReads", c("BamViews", "characterORNULL", "missing"), 
-  function(bv, strandmarker=NULL, as.GRanges) {
+  function(bv, strandmarker=NULL, as.GRanges=FALSE) {
   .tabulateReads(bv, strandmarker, FALSE)
 })
 
 setMethod("tabulateReads", c("BamViews", "missing", "missing"), 
-  function(bv, strandmarker=NULL) {
+  function(bv, strandmarker=NULL, as.GRanges=FALSE) {
   .tabulateReads(bv, NULL, FALSE)
 })
