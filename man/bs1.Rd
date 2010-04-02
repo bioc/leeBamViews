@@ -98,8 +98,8 @@ bs1
 
 START=c(861250, 863000)
 END=c(862750, 864000)
-exc = RangedData(IRanges(start=START, end=END), space="Scchr13")
-exc$name = c("intv1", "intv2")  # necessary
+exc = GRanges(IRanges(start=START, end=END), seqnames="Scchr13", strand="+")
+values(exc)$name = c("intv1", "intv2")  # necessary
 bamRanges(bs1) = exc
 bs1
 tabulateReads(bs1, "+")

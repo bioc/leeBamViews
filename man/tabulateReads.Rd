@@ -50,8 +50,9 @@ example(bs1)
 #
 # counts in a partition
 #
-myrn = RangedData(IRanges(start=seq(861250, 862750, 100), width=100),
-    space="Scchr13")
+myrn = GRanges(IRanges(start=seq(861250, 862750, 100), width=100),
+    seqnames="Scchr13", strand="+")
+
 myrn$name = paste("til", 1:nrow(myrn), sep=".")
 bamRanges(bs1) = myrn
 tabulateReads(bs1, "+")
