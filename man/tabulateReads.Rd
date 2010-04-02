@@ -57,7 +57,7 @@ example(bs1)
 myrn = GRanges(IRanges(start=seq(861250, 862750, 100), width=100),
     seqnames="Scchr13", strand="+")
 
-myrn$name = paste("til", 1:nrow(myrn), sep=".")
+values(myrn)$name = paste("til", 1:length(myrn), sep=".")
 bamRanges(bs1) = myrn
 tabulateReads(bs1, "+")
 }
