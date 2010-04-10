@@ -22,37 +22,36 @@ Formal class 'BamViews' [package "Rsamtools"] with 5 slots \cr
   .. .. ..@ listData       :List of 2 \cr
   .. .. .. ..$ geno: chr [1:8] "isowt" "isowt" "rlp" "rlp" ... \cr
   .. .. .. ..$ lane: chr [1:8] "5" "6" "5" "6" ... \cr
-  ..@ bamRanges    :Formal class 'RangedData' [package "IRanges"] with 5 slots \cr
-  .. .. ..@ ranges         :Formal class 'SimpleRangesList' [package "IRanges"] with 4 slots \cr
+  ..@ bamRanges    :Formal class 'GRanges' [package "GenomicRanges"] with 7 slots \cr
+  .. .. ..@ seqnames       :Formal class 'Rle' [package "IRanges"] with 5 slots \cr
+  .. .. .. .. ..@ values         : Factor w/ 1 level "Scchr13": 1 \cr
+  .. .. .. .. ..@ lengths        : int 27 \cr
   .. .. .. .. ..@ elementMetadata: NULL \cr
-  .. .. .. .. ..@ elementType    : chr "Ranges" \cr
+  .. .. .. .. ..@ elementType    : chr "ANY" \cr
+  .. .. .. .. ..@ metadata       : list() \cr
+  .. .. ..@ ranges         :Formal class 'IRanges' [package "IRanges"] with 6 slots \cr
+  .. .. .. .. ..@ start          : int [1:27] 798517 801771 804455 808999 810465 811088 818826 820255 822762 832338 ... \cr
+  .. .. .. .. ..@ width          : int [1:27] 2862 933 636 234 114 108 1122 2199 1869 915 ... \cr
+  .. .. .. .. ..@ NAMES          : NULL \cr
+  .. .. .. .. ..@ elementMetadata: NULL \cr
+  .. .. .. .. ..@ elementType    : chr "integer" \cr
+  .. .. .. .. ..@ metadata       : list() \cr
+  .. .. ..@ strand         :Formal class 'Rle' [package "IRanges"] with 5 slots \cr
+  .. .. .. .. ..@ values         : Factor w/ 3 levels "+","-","*": 1 \cr
+  .. .. .. .. ..@ lengths        : int 27 \cr
+  .. .. .. .. ..@ elementMetadata: NULL \cr
+  .. .. .. .. ..@ elementType    : chr "ANY" \cr
+  .. .. .. .. ..@ metadata       : list() \cr
+  .. .. ..@ seqlengths     : Named int NA \cr
+  .. .. .. ..- attr(*, "names")= chr "Scchr13" \cr
+  .. .. ..@ elementMetadata:Formal class 'DataFrame' [package "IRanges"] with 6 slots \cr
+  .. .. .. .. ..@ rownames       : NULL \cr
+  .. .. .. .. ..@ nrows          : int 27 \cr
+  .. .. .. .. ..@ elementMetadata: NULL \cr
+  .. .. .. .. ..@ elementType    : chr "ANY" \cr
   .. .. .. .. ..@ metadata       : list() \cr
   .. .. .. .. ..@ listData       :List of 1 \cr
-  .. .. .. .. .. ..$ 1:Formal class 'IRanges' [package "IRanges"] with 6 slots \cr
-  .. .. .. .. .. .. .. ..@ start          : int(0)  \cr
-  .. .. .. .. .. .. .. ..@ width          : int(0)  \cr
-  .. .. .. .. .. .. .. ..@ NAMES          : NULL \cr
-  .. .. .. .. .. .. .. ..@ elementMetadata: NULL \cr
-  .. .. .. .. .. .. .. ..@ elementType    : chr "integer" \cr
-  .. .. .. .. .. .. .. ..@ metadata       : list() \cr
-  .. .. ..@ values         :Formal class 'CompressedSplitDataFrameList' [package "IRanges"] with 5 slots \cr
-  .. .. .. .. ..@ elementMetadata: NULL \cr
-  .. .. .. .. ..@ elementType    : chr "DataFrame" \cr
-  .. .. .. .. ..@ metadata       : list() \cr
-  .. .. .. .. ..@ partitioning   :Formal class 'PartitioningByEnd' [package "IRanges"] with 5 slots \cr
-  .. .. .. .. .. .. ..@ end            : int 0 \cr
-  .. .. .. .. .. .. ..@ NAMES          : chr "1" \cr
-  .. .. .. .. .. .. ..@ elementMetadata: NULL \cr
-  .. .. .. .. .. .. ..@ elementType    : chr "integer" \cr
-  .. .. .. .. .. .. ..@ metadata       : list() \cr
-  .. .. .. .. ..@ unlistData     :Formal class 'DataFrame' [package "IRanges"] with 6 slots \cr
-  .. .. .. .. .. .. ..@ rownames       : NULL \cr
-  .. .. .. .. .. .. ..@ nrows          : int 0 \cr
-  .. .. .. .. .. .. ..@ elementMetadata: NULL \cr
-  .. .. .. .. .. .. ..@ elementType    : chr "ANY" \cr
-  .. .. .. .. .. .. ..@ metadata       : list() \cr
-  .. .. .. .. .. .. ..@ listData       : list() \cr
-  .. .. ..@ elementMetadata: NULL \cr
+  .. .. .. .. .. ..$ name: chr [1:27] "YMR266W" "YMR267W" "YMR269W" "YMRWdelta20" ... \cr
   .. .. ..@ elementType    : chr "ANY" \cr
   .. .. ..@ metadata       : list() \cr
   ..@ bamExperiment:List of 1 \cr
