@@ -47,6 +47,7 @@ cov2baseTrack = function(rle, start, end,
     dp=dp)
 }
 
+library(biomaRt)
 mart = useMart("ensembl", "scerevisiae_gene_ensembl")
 
 
