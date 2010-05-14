@@ -60,6 +60,10 @@ myrn = GRanges(IRanges(start=seq(861250, 862750, 100), width=100),
 values(myrn)$name = paste("til", 1:length(myrn), sep=".")
 bamRanges(bs1) = myrn
 tabulateReads(bs1, "+")
+#
+# a related computation based on countBam
+lapply(bamPaths(bs1)[1:2], function(x) 
+    countBam(x,  param=ScanBamParam(which=bamRanges(bs1))))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
