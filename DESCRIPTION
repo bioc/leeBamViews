@@ -1,6 +1,6 @@
 Package: leeBamViews
 Title: leeBamViews -- multiple yeast RNAseq samples excerpted from Lee 2009
-Version: 0.99.8
+Version: 0.99.10
 Author: VJ Carey <stvjc@channing.harvard.edu>
 Description: data from PMID 19096707; prototype for managing multiple NGS samples
 Depends: Biobase, Rsamtools (>= 0.1.50), BSgenome
