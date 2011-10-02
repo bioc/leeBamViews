@@ -6,6 +6,7 @@ Description: data from PMID 19096707; prototype for managing multiple NGS sample
 Depends: Biobase, Rsamtools (>= 0.1.50), BSgenome
 Imports: GenomicRanges, methods
 Suggests: GenomeGraphs, biomaRt, org.Sc.sgd.db, edgeR
+Enhances: multicore
 Maintainer: VJ Carey <stvjc@channing.harvard.edu>
 License: Artistic 2.0
 LazyLoad: yes

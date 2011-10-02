@@ -1,9 +1,9 @@
-setMethod("strand", "logical", function(x) {
-if (0L == length(x)) strand()
-else strand(ifelse(x, "+", "-"))
-})
+#setMethod("strand", "logical", function(x) {
+#if (0L == length(x)) strand()
+#else strand(ifelse(x, "+", "-"))
+#})
 
-.tabulateReads = function(bv, strandmarker=NULL, as.GRanges=FALSE) {
+.tabulateReads = function(bv, strandmarker=NULL, as.GRanges=FALSE, applier=lapply) {
  if (!is.null(strandmarker) && !(strandmarker %in% c("+", "-")))
    stop("if non-missing, strandmarker must be either NULL, +, or -")
  br = bamRanges(bv)
@@ -11,8 +11,11 @@ else strand(ifelse(x, "+", "-"))
  if (length(rnames)==0) stop("bamRanges(bv) must have a name element for table annotation")
  nregions = length(br)
 # you need to use the file interface for now (March 25 2010)
- alignByFirstRange = function(bv) lapply(bamPaths(bv), function(x) readBamGappedAlignments(x, which=bamRanges(bv[1,])))
- als = lapply(1:nregions, function(i)try(alignByFirstRange(bv[i,]), silent=TRUE))
+ alignByFirstRange = function(bv) {
+   sp = ScanBamParam(which=bamRanges(bv[1,]))
+   lapply(bamPaths(bv), function(x) readBamGappedAlignments(x, param=sp))
+ }
+ als = applier(1:nregions, function(i)try(alignByFirstRange(bv[i,]), silent=TRUE))
  ok = !sapply(als, inherits, "try-error")
  if (any(!ok)) warning(paste("readGappedAlignments failed for range(s)",
       paste(rnames[-which(ok)], collapse=" "), ", so dropping these"))
@@ -36,19 +39,21 @@ else strand(ifelse(x, "+", "-"))
  ans
 }
 
-setGeneric("tabulateReads", function(bv, strandmarker=NULL, as.GRanges=FALSE)
+setGeneric("tabulateReads", function(bv, strandmarker=NULL, as.GRanges=FALSE, applier=lapply)
  standardGeneric("tabulateReads"))
 
-setMethod("tabulateReads", c("BamViews", "characterORNULL", "logical"), 
-  function(bv, strandmarker=NULL, as.GRanges=FALSE) {
-  .tabulateReads(bv, strandmarker, as.GRanges)
+setMethod("tabulateReads", c("BamViews", "characterORNULL", "logical", "function"), 
+  function(bv, strandmarker=NULL, as.GRanges=FALSE, applier=lapply) {
+  .tabulateReads(bv, strandmarker, as.GRanges, applier)
 })
-setMethod("tabulateReads", c("BamViews", "characterORNULL", "missing"), 
-  function(bv, strandmarker=NULL, as.GRanges=FALSE) {
-  .tabulateReads(bv, strandmarker, FALSE)
+setMethod("tabulateReads", c("BamViews", "characterORNULL", "missing", "missing"), 
+  function(bv, strandmarker=NULL, as.GRanges=FALSE, applier=lapply) {
+  if ("package:multicore" %in% search()) applier = mclapply
+  .tabulateReads(bv, strandmarker, FALSE, applier)
 })
 
-setMethod("tabulateReads", c("BamViews", "missing", "missing"), 
-  function(bv, strandmarker=NULL, as.GRanges=FALSE) {
-  .tabulateReads(bv, NULL, FALSE)
+setMethod("tabulateReads", c("BamViews", "missing", "missing", "missing"), 
+  function(bv, strandmarker=NULL, as.GRanges=FALSE, applier=lapply) {
+  if ("package:multicore" %in% search()) applier = mclapply
+  .tabulateReads(bv, NULL, FALSE, applier)
 })
