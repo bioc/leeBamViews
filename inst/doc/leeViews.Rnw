@@ -342,7 +342,7 @@ is the model-based estimate of relative abundance. In the following
 display we label the top 10 genes (those with smallest FDR).
 
 <<lkma,fig=TRUE>>=
-plotSmear(cd, cex=.8, ylim=c(-10,10))
+plotSmear(cd, cex=.8, ylim=c(-5,5))
 text(tt12$table$logConc, tt12$table$logFC+.15, as.character(
   tt12$table$genes), cex=.65)
 @
