@@ -53,9 +53,9 @@ mart = useMart("ensembl", "scerevisiae_gene_ensembl")
 
 ###################################################
 plotStrains = function(bs, query, start, end, snames, mart, martchr, seqname, strand="+") {
- mm = findOverlaps(bamRanges(bs), query)@matchMatrix
+ mm = as.matrix(findOverlaps(bamRanges(bs), query))
  if (nrow(mm) < 1) stop("no overlap between query and input bamViews")
- filtbs = bs[mm[,"subject"], ]
+ filtbs = bs[mm[,"subjectHits"], ]
  cov = lapply(bamPaths(filtbs), function(x)coverage(readGappedAlignments(x))[[seqname]])
  covtrs = lapply(cov, function(x) cov2baseTrack(x, start, end,
    countTx = function(x) pmin(x,80)))
