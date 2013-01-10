@@ -269,7 +269,7 @@ In the \Rpackage{leeBamViews} package, we do not have access to all these,
 but only those lying in a 100kb interval. 
 <<dolim>>=
 lim = GRanges(seqnames="Scchr13", IRanges(800000,900000), strand="+")
-c13prol = c13pro[ which(c13pro %in% lim ), ]
+c13prol = c13pro[ which(overlapsAny(c13pro , lim) ), ]
 @
 
 Now that we have a set of annotation-based genomic regions, we can tabulate
