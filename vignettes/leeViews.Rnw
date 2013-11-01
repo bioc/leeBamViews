@@ -139,14 +139,14 @@ bs1
 @
 
 A common operation will be to extract coverage information. We use
-a transforming method, \Rfunction{readGappedAlignments}, from the
+a transforming method, \Rfunction{readGAlignments}, from the
 \Rpackage{GenomicRanges} package to extract reads and metadata for
 each region and each sample.
 @
 <<lkcov>>=
 covex =
   RleList(lapply(bamPaths(bs1), function(x)
-                 coverage(readGappedAlignments(x))[["Scchr13"]]))
+                 coverage(readGAlignments(x))[["Scchr13"]]))
 names(covex) = gsub(".bam$", "", basename(bamPaths(bs1)))
 head(covex, 3)
 @

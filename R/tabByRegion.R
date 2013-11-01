@@ -13,11 +13,11 @@
 # you need to use the file interface for now (March 25 2010)
  alignByFirstRange = function(bv) {
    sp = ScanBamParam(which=bamRanges(bv[1,]))
-   lapply(bamPaths(bv), function(x) readBamGappedAlignments(x, param=sp))
+   lapply(bamPaths(bv), function(x) readGAlignmentsFromBam(x, param=sp))
  }
  als = applier(1:nregions, function(i)try(alignByFirstRange(bv[i,]), silent=TRUE))
  ok = !sapply(als, inherits, "try-error")
- if (any(!ok)) warning(paste("readGappedAlignments failed for range(s)",
+ if (any(!ok)) warning(paste("readGAlignments failed for range(s)",
       paste(rnames[-which(ok)], collapse=" "), ", so dropping these"))
  als = als[which(ok)]
 # strs = lapply(als, sapply, strand)
