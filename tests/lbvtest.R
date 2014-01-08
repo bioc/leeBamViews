@@ -53,6 +53,7 @@ mart = useMart("ensembl", "scerevisiae_gene_ensembl")
 
 ###################################################
 plotStrains = function(bs, query, start, end, snames, mart, martchr, seqname, strand="+") {
+ library(GenomicAlignments)  # for the readGAlignments() function
  mm = as.matrix(findOverlaps(bamRanges(bs), query))
  if (nrow(mm) < 1) stop("no overlap between query and input bamViews")
  filtbs = bs[mm[,"subjectHits"], ]
