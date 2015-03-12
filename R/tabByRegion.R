@@ -13,7 +13,7 @@
 # you need to use the file interface for now (March 25 2010)
  alignByFirstRange = function(bv) {
    sp = ScanBamParam(which=bamRanges(bv[1,]))
-   lapply(bamPaths(bv), function(x) readGAlignmentsFromBam(x, param=sp))
+   lapply(bamPaths(bv), function(x) readGAlignments(x, param=sp))
  }
  als = applier(1:nregions, function(i)try(alignByFirstRange(bv[i,]), silent=TRUE))
  ok = !sapply(als, inherits, "try-error")

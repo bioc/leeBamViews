@@ -28,7 +28,7 @@ logical directive to return a GRanges instance instead of a matrix
 attached will use mclapply}
 }
 \details{
-\code{\link[GenomicAlignments]{readGAlignmentsFromBam}} is the basic engine
+\code{\link[GenomicAlignments]{readGAlignments}} is the basic engine
 for this task
 }
 \value{
