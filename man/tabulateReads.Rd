@@ -1,7 +1,7 @@
 \name{tabulateReads}
 \alias{tabulateReads}
-\alias{tabulateReads,BamViews,characterORNULL,logical,function-method}
-\alias{tabulateReads,BamViews,characterORNULL,missing,missing-method}
+\alias{tabulateReads,BamViews,character_OR_NULL,logical,function-method}
+\alias{tabulateReads,BamViews,character_OR_NULL,missing,missing-method}
 \alias{tabulateReads,BamViews,missing,missing,missing-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
