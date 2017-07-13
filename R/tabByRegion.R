@@ -42,11 +42,11 @@
 setGeneric("tabulateReads", function(bv, strandmarker=NULL, as.GRanges=FALSE, applier=lapply)
  standardGeneric("tabulateReads"))
 
-setMethod("tabulateReads", c("BamViews", "characterORNULL", "logical", "function"), 
+setMethod("tabulateReads", c("BamViews", "character_OR_NULL", "logical", "function"), 
   function(bv, strandmarker=NULL, as.GRanges=FALSE, applier=lapply) {
   .tabulateReads(bv, strandmarker, as.GRanges, applier)
 })
-setMethod("tabulateReads", c("BamViews", "characterORNULL", "missing", "missing"), 
+setMethod("tabulateReads", c("BamViews", "character_OR_NULL", "missing", "missing"), 
   function(bv, strandmarker=NULL, as.GRanges=FALSE, applier=lapply) {
   if ("package:multicore" %in% search()) applier = mclapply
   .tabulateReads(bv, strandmarker, FALSE, applier)
