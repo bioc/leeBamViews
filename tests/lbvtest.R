@@ -35,6 +35,7 @@ END=c(862750, 864000)
 exc = GRanges(IRanges(start=START, end=END), seqnames="Scchr13", strand="+")
 bamRanges(bs1) = exc
 
+bad = function() {
 cov2baseTrack = function(rle, start, end,
    dp = DisplayPars(type="l", lwd=0.5, color="black"),
    countTx=function(x)log10(x+1)) {
@@ -76,4 +77,5 @@ plotStrains = function(bs, query, start, end, snames, mart, martchr, seqname, st
 
 NN = GRanges(IRanges(start=START,end=END), seqnames="Scchr13")
 plotStrains(bs1, NN, 800000, 900000, LETTERS[1:8], mart, "XIII", seqname="Scchr13")
+}
 
