@@ -86,7 +86,7 @@ geno = gsub(".$", "", gt)
 # format the sample-level information appropriately
 #
 pd = DataFrame(geno=geno, lane=lane, row.names=paste(geno,lane,sep="."))
-prd = new("DataFrame")  # protocol data could go here
+prd = new("DFrame")  # protocol data could go here
 #
 # create the views object, adding some arbitrary experiment-level information
 #
